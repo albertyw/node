@@ -23,7 +23,11 @@ app.use(function(req, res, next){
   db.zrevrangebyscore('online', '+inf', ago, function(err, users){
     if (err) return next(err);
     req.online = users;
-    next();
+    db.zcount('online', '-inf', '+inf', function(err, total){
+      if (err) return next(err);
+      req.total = total;
+      next();
+    });
   });
 });
 
@@ -44,7 +48,9 @@ app.get('/hi.txt', function(req, res){
 
 // Create default page
 app.get('/', function(req, res){
-  res.send(req.online.length + ' users online');
+  var text = req.online.length + ' users online<br />';
+  text += req.total + ' total users';
+  res.send(text);
 });
 
 
